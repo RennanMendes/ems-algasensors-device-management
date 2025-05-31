@@ -1,5 +1,6 @@
 package com.algaworks.algasensors.device.management.api.controller;
 
+import com.algaworks.algasensors.device.management.api.client.SensorMonitoringClient;
 import com.algaworks.algasensors.device.management.api.model.SensorInput;
 import com.algaworks.algasensors.device.management.api.model.SensorOutput;
 import com.algaworks.algasensors.device.management.common.IdGenerator;
@@ -21,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class SensorController {
 
     private final SensorRepository sensorRepository;
+    private final SensorMonitoringClient sensorMonitoringClient;
 
     @GetMapping
     public Page<SensorOutput> search(@PageableDefault Pageable pageable) {
@@ -71,6 +73,7 @@ public class SensorController {
         Sensor sensor = findSensorById(sensorId);
         sensor.setEnabled(true);
 
+        sensorMonitoringClient.enabledMonitoring(sensorId);
         return convertToModel(sensorRepository.save(sensor));
     }
 
@@ -79,6 +82,8 @@ public class SensorController {
     public void delete(@PathVariable TSID sensorId) {
         Sensor sensor = findSensorById(sensorId);
         sensorRepository.delete(sensor);
+
+        sensorMonitoringClient.disableMonitoring(sensorId);
     }
 
     @DeleteMapping("{sensorId}/enable")
@@ -87,6 +92,7 @@ public class SensorController {
         Sensor sensor = findSensorById(sensorId);
         sensor.setEnabled(false);
 
+        sensorMonitoringClient.disableMonitoring(sensorId);
         return convertToModel(sensorRepository.save(sensor));
     }
 
